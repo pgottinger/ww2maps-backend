@@ -1,6 +1,6 @@
 var restify = require('restify');
 var database = require('./database.js');
-var config = require('./config.js');
+var config = require('./../config.js');
 
 (function() {
 
