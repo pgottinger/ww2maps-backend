@@ -1,18 +1,40 @@
 var restify = require('restify');
+var database = require('./database.js');
+var config = require('./config.js');
 
-function respond(req, res, next) {
-  var body={'Easy': {'name':'Easy Company','co':'Dick Winters','lat':49.4596, 'lng':6.8147},'Fox': {'name':'Fox Company','co':'Another','lat':49.4596, 'lng':6.8347}};
-  
+(function() {
+
+module.exports.initServer=function() {
+  var server = restify.createServer();
+  server.use(restify.queryParser());
+  server.get('/ww2maps/getUnitsForMapBoundsAndDate', getUnitsForMapBoundsAndDate);
+
+  server.listen(config.serverport, function() {
+    console.log('%s listening at %s', server.name, server.url);
+  });
+}
+
+function answer(req, res, next, data) {
   res.status(200);
   res.contentType="json";
-  res.send(body);
+  res.send(data);
   return next();
 }
 
-var server = restify.createServer();
-server.get('/ww2maps/:date/:minlat/:maxlat/:minlng/:maxlng', respond);
+function getUnitsForMapBoundsAndDate(req, res, next) {  
+  var callback = function(req, res, next, rows) {
+    var json = {};   
+      for(i in rows) {
+        json[rows[i].unit_id]={};
+        json[rows[i].unit_id].name=rows[i].unit_name;
+        json[rows[i].unit_id].lat=parseFloat(rows[i].lat);
+        json[rows[i].unit_id].lng=parseFloat(rows[i].lng);      
+      }
+      answer(req, res, next, JSON.stringify(json));     
+  }
+  
+  database.getUnitsForMapBoundsAndDate(req, res, next, callback);
+}
 
-server.listen(8080, function() {
-  console.log('%s listening at %s', server.name, server.url);
-});
+}());
 
