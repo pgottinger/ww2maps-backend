@@ -53,6 +53,7 @@ var calls = 0;
 function callback() {
 	calls++;
 	if(calls === 3) {
+	  connection.end();
 		console.log("\nInstallation successful!\nYou can now start the server with \"node ww2maps-backend.js\"");		
 		process.exit(0);
 	}
